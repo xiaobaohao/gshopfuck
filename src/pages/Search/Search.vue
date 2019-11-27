@@ -23,6 +23,7 @@ export default {
 <style lang="stylus">
      &.search  //搜索
           width 100%
+          // overflow hidden
           .search_form
             clearFix()
             margin-top 45px

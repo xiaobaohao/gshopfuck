@@ -30,16 +30,16 @@
                   <input type="tel" maxlength="11" placeholder="手机/邮箱/用户名" v-model="name">
                 </section>
                 <section class="login_verification">
-                  <input type="tel" maxlength="8" placeholder="密码" v-if="showPwd" v-model="pwd">
-                  <input type="password" maxlength="8" placeholder="密码" v-else v-model="pwd">                 
+                  <input type="text" maxlength="8" placeholder="密码" v-if="showPwd" v-model="pwd">
+                  <input type="password" maxlength="8" placeholder="密码" v-else v-model="pwd" autocomplete='tel'>                 
                   <div class="switch_button" :class="showPwd ? 'on':'off'" @click="showPwd=!showPwd">
                     <div class="switch_circle" :class="{right:showPwd}"></div>
                     <span class="switch_text">{{showPwd ? 'abc':'...'}}</span>
                   </div>
                 </section>
                 <section class="login_message">
-                  <input type="text" maxlength="11" placeholder="验证码" captcha>
-                  <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha" @click="getCaptcha">
+                  <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
+                  <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha" @click="getCaptcha" ref="captcha">
                 </section>
               </section>
             </div>
@@ -57,6 +57,7 @@
 
 <script>
 import AlertTip from '../../components/AlertTip/AlertTip.vue'
+import {reqSendCode,reqLogSms,reqPwdLogin} from '../../api'
 
 export default {
     data() {
@@ -85,36 +86,26 @@ export default {
         this.alertText=alertText
       },
       //获取短信验证码
-      getCode(){
+      async getCode(){
         if(!this.computeTime){
           //启动循环定时器
           this.computeTime=30
-          const intervalId=setInterval(() => {
+            this.intervalId=setInterval(() => {
             this.computeTime--
             if(this.computeTime<=0){
-              clearInterval(intervalId)
+              clearInterval(this.intervalId)
             }         
           },1000)
           //发送ajax请求
-        }
-      },
-      //登陆
-      login(){
-        if(this.loginWay){ //短信登陆
-          const {phone,rightPhone,code}=this
-          if(!rightPhone){
-            this.showAlert('手机号码不正确')
-          }else if(!/\^d{6}$/.test(code)){
-            this.showAlert('短信验证码必须是六位数')
-          }
-        }else{   //密码登陆
-          const {name,pwd,captcha}=this
-          if(!name){
-            this.showAlert('用户名不能为空')
-          }else if(!pwd){
-            this.showAlert('密码不能为空')
-          }else if(!captcha){
-            this.showAlert('验证码不能为空')
+          const result=await reqSendCode(this.phone)
+          if(result.code===1){
+            //显示提示
+            this.showAlert(result.msg)
+            //停止倒计时
+            if(this.computeTime){
+              this.computeTime=0
+              clearInterval(this.intervalId)
+            }
           }
         }
       },
@@ -124,9 +115,58 @@ export default {
         this.alertText=''
       },
       //获取一次性图形验证码
-      getCaptcha(event){
-        event.target.src='http://localhost:4000/captcha?time='+Date.now()
-      }
+      getCaptcha(){
+        this.$refs.captcha.src='http://localhost:4000/captcha?time='+Date.now()
+      },
+      //登陆
+      async login(){
+        let result
+        if(this.loginWay){ //短信登陆
+          const {phone,rightPhone,code}=this
+          if(!rightPhone){
+            this.showAlert('手机号码不正确')
+            return
+          }else if(!/^\d{6}$/.test(code)){
+            this.showAlert('短信验证码必须是六位数')
+            return
+          }
+          //发送ajax请求
+          result=await reqLogSms(phone,code)
+        }else{   //密码登陆
+          const {name,pwd,captcha}=this
+          if(!name){
+            this.showAlert('用户名不能为空')
+            return
+          }else if(!pwd){
+            this.showAlert('密码不能为空')
+            return
+          }else if(!captcha){
+            this.showAlert('验证码不能为空')
+            return
+          }
+          //发送ajax请求
+          result=await reqPwdLogin({name,pwd,captcha})
+        }
+        //关闭定时器
+          if(this.computeTime){
+            this.computeTime=0
+            clearInterval(this.intervalId)
+          }
+        //验证是否登陆成功
+        if(result.code===0){   //登陆成功
+          const user=result.data
+          //把用户信息存入vuex中
+          console.log(111)
+          this.$router.replace('/profile')
+        }else{ //登陆失败
+          const msg=result.msg
+          //更新图形验证码
+          this.getCaptcha()
+          //显示提示
+          this.showAlert(msg)
+        }
+      },
+      
     },
     components:{
       AlertTip
