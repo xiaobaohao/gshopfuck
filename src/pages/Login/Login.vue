@@ -39,7 +39,7 @@
                 </section>
                 <section class="login_message">
                   <input type="text" maxlength="11" placeholder="验证码" captcha>
-                  <img class="get_verification" src="./images/captcha.svg" alt="captcha">
+                  <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha" @click="getCaptcha">
                 </section>
               </section>
             </div>
@@ -79,10 +79,12 @@ export default {
       }
     },
     methods: {
+      //弹出警告框
       showAlert(alertText){
         this.alertShow=true
         this.alertText=alertText
       },
+      //获取短信验证码
       getCode(){
         if(!this.computeTime){
           //启动循环定时器
@@ -96,6 +98,7 @@ export default {
           //发送ajax请求
         }
       },
+      //登陆
       login(){
         if(this.loginWay){ //短信登陆
           const {phone,rightPhone,code}=this
@@ -115,9 +118,14 @@ export default {
           }
         }
       },
+      //关闭警告框
       closeTip(){
         this.alertShow=false
         this.alertText=''
+      },
+      //获取一次性图形验证码
+      getCaptcha(event){
+        event.target.src='http://localhost:4000/captcha?time='+Date.now()
       }
     },
     components:{

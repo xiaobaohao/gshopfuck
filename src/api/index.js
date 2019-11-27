@@ -11,7 +11,7 @@ export const reqShops = ({latitude,longitude}) => ajax(base_path+`/shops`,{latit
 // 4、根据经纬度和关键字搜索商铺列表](#4根据经纬度和关键字搜索商铺列表)
 export const reqShopByKeyword = ({keyword,geohash}) => ajax(base_path+`/search_shops`,{keyword,geohash})
 // 5、获取一次性验证码](#5获取一次性验证码)
-export const reqCaptcha = () => ajax(base_path+`/captcha`)
+// export const reqCaptcha = () => ajax(base_path+`/captcha`)
 // 6、用户名密码登陆](#6用户名密码登陆)
 export const reqLoginPwd = (name,pwd,captcha) => ajax(base_path+`/login_pwd`,{name,pwd,captcha},'POST')
 // 7、发送短信验证码](#7发送短信验证码)
