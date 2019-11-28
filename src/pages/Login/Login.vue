@@ -156,7 +156,7 @@ export default {
         if(result.code===0){   //登陆成功
           const user=result.data
           //把用户信息存入vuex中
-          console.log(111)
+          this.$store.dispatch('recordUserInfo',user)
           this.$router.replace('/profile')
         }else{ //登陆失败
           const msg=result.msg

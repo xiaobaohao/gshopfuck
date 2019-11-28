@@ -12,6 +12,7 @@ import FooterGuide from './components/FooterGuide/FooterGuide.vue'
 export default {
     mounted() {
         this.getAddress()
+        this.$store.dispatch('getUserInfo')
     },
     methods: {
         ...mapActions(['getAddress'])
