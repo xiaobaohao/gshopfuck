@@ -22,3 +22,9 @@ export const reqLogSms = (phone,code)=> ajax(base_path+`/login_sms`,{phone,code}
 export const reqUserInfo = () => ajax(base_path+`/userinfo`)
 // 10、用户登出](#10用户登出)
 export const reqLogOut = () => ajax(base_path+`/logout`)
+
+export const reqShopGoods = () => ajax('/goods')
+
+export const reqShopRatings = () => ajax('/ratings')
+
+export const reqShopInfo = () => ajax('/info')
